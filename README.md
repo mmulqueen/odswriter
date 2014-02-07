@@ -17,7 +17,7 @@ The MIT License (MIT), refer to LICENSE.txt
 
 Example
 ---------
-```python2
+```python
 import datetime
 import decimal
 import odswriter as ods
