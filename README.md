@@ -10,6 +10,7 @@ Features
  - Includes support for datetime, date and time types
  - Includes support for Decimal type
  - Compatible with Python 2.7 and 3.3 (and probably others)
+ - Support for writing formulae (but not evaluating their results)
 
 License
 -----------
@@ -29,4 +30,5 @@ with ods.writer(open("test.ods","wb")) as odsfile:
     odsfile.writerow(["Date/DateTime", datetime.datetime.now(), datetime.date(1989,11,9)])
     odsfile.writerow(["Time",datetime.time(13,37),datetime.time(16,17,18)])
     odsfile.writerow(["Bool",True,False,True])
+    odsfile.writerow(["Formula",1,2,3,ods.Formula("IF(A1=2,B1,C1)")])
 ```

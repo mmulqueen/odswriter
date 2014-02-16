@@ -5,6 +5,7 @@ import datetime
 from xml.dom.minidom import parseString
 
 import odswriter.ods_components as ods_components
+from odswriter.formula import Formula
 
 try:
     long
@@ -64,6 +65,8 @@ class ODSWriter(object):
                 cell.setAttribute("office:boolean-value", "true" if cell_data else "false")
                 cell.setAttribute("table:style-name", "cBool")
                 text="TRUE" if cell_data else "FALSE"
+            elif isinstance(cell_data, Formula):
+                 cell.setAttribute("table:formula", str(cell_data))
             elif cell_type == type(None):
                 pass # Empty element
             else:
