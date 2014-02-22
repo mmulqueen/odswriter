@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "pypy"
+
+# no deps required for odswriter to work, but I nose2 used for tests.
+
+install:
+  - pip install nose2
+
+# command to run tests
+script: nose2
