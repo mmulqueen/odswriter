@@ -4,8 +4,8 @@ import decimal
 import datetime
 from xml.dom.minidom import parseString
 
-import odswriter.ods_components as ods_components
-from odswriter.formula import Formula
+from . import ods_components
+from .formula import Formula
 
 try:
     long
@@ -17,21 +17,24 @@ try:
 except NameError:
     unicode = str
 
+
 class ODSWriter(object):
     def __init__(self, odsfile):
-        self.zipf = ZipFile(odsfile,"w")
-        self.make_skeleton()
-    def make_skeleton(self):
+        self.zipf = ZipFile(odsfile, "w")
+        # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
         self.table = self.dom.getElementsByTagName("table:table")[0]
-        self.zipf.writestr("manifest.rdf",ods_components.manifest_rdf.encode("utf-8"))
-        self.zipf.writestr("mimetype",ods_components.mimetype.encode("utf-8"))
-        self.zipf.writestr("META-INF/manifest.xml",ods_components.manifest_xml.encode("utf-8"))
+        self.zipf.writestr("manifest.rdf",
+                           ods_components.manifest_rdf.encode("utf-8"))
+        self.zipf.writestr("mimetype",
+                           ods_components.mimetype.encode("utf-8"))
+        self.zipf.writestr("META-INF/manifest.xml",
+                           ods_components.manifest_xml.encode("utf-8"))
 
     def __enter__(self):
         return self
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, *args, **kwargs):
         self.close()
 
     def close(self):
@@ -43,32 +46,40 @@ class ODSWriter(object):
         for cell_data in cells:
             cell = self.dom.createElement("table:table-cell")
             text = None
-            cell_type = type(cell_data)
-            if cell_type in (datetime.date,datetime.datetime):
+
+            if isinstance(cell_data, (datetime.date, datetime.datetime)):
                 cell.setAttribute("office:value-type", "date")
-                date_str = text=cell_data.isoformat()
+                date_str = cell_data.isoformat()
                 cell.setAttribute("office:date-value", date_str)
                 cell.setAttribute("table:style-name", "cDateISO")
-                text=date_str
-            elif cell_type == datetime.time:
+                text = date_str
+
+            elif isinstance(cell_data, datetime.time):
                 cell.setAttribute("office:value-type", "time")
-                cell.setAttribute("office:time-value", cell_data.strftime("PT%HH%MM%SS"))
+                cell.setAttribute("office:time-value",
+                                  cell_data.strftime("PT%HH%MM%SS"))
                 cell.setAttribute("table:style-name", "cTime")
-                text=cell_data.strftime("%H:%M:%S")
-            elif cell_type in (float, int, decimal.Decimal, long):
+                text = cell_data.strftime("%H:%M:%S")
+
+            elif isinstance(cell_data, (float, int, decimal.Decimal, long)):
                 cell.setAttribute("office:value-type", "float")
                 float_str = unicode(cell_data)
                 cell.setAttribute("office:value", float_str)
-                text=float_str
-            elif cell_type == bool:
+                text = float_str
+
+            elif isinstance(cell_data, bool):
                 cell.setAttribute("office:value-type", "boolean")
-                cell.setAttribute("office:boolean-value", "true" if cell_data else "false")
+                cell.setAttribute("office:boolean-value",
+                                  "true" if cell_data else "false")
                 cell.setAttribute("table:style-name", "cBool")
-                text="TRUE" if cell_data else "FALSE"
+                text = "TRUE" if cell_data else "FALSE"
+
             elif isinstance(cell_data, Formula):
-                 cell.setAttribute("table:formula", str(cell_data))
-            elif cell_type == type(None):
-                pass # Empty element
+                cell.setAttribute("table:formula", str(cell_data))
+
+            elif cell_data is None:
+                pass  # Empty element
+
             else:
                 # String and unknown types become string cells
                 cell.setAttribute("office:value-type", "string")
@@ -87,7 +98,8 @@ class ODSWriter(object):
         for row in rows:
             self.writerow(row)
 
-def writer(odsfile, **kwargs):
+
+def writer(odsfile, *args, **kwargs):
     """
         Returns an ODSWriter object.
 
@@ -97,4 +109,4 @@ def writer(odsfile, **kwargs):
         ...
         Otherwise you will get "TypeError: must be str, not bytes"
     """
-    return ODSWriter(odsfile, **kwargs)
+    return ODSWriter(odsfile, *args, **kwargs)
