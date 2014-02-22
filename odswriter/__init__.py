@@ -24,9 +24,9 @@ class ODSWriter(object):
     def make_skeleton(self):
         self.dom = parseString(ods_components.content_xml)
         self.table = self.dom.getElementsByTagName("table:table")[0]
-        self.zipf.writestr("manifest.rdf",ods_components.manifest_rdf)
-        self.zipf.writestr("mimetype",ods_components.mimetype)
-        self.zipf.writestr("META-INF/manifest.xml",ods_components.manifest_xml)
+        self.zipf.writestr("manifest.rdf",ods_components.manifest_rdf.encode("utf-8"))
+        self.zipf.writestr("mimetype",ods_components.mimetype.encode("utf-8"))
+        self.zipf.writestr("META-INF/manifest.xml",ods_components.manifest_xml.encode("utf-8"))
 
     def __enter__(self):
         return self
@@ -35,7 +35,7 @@ class ODSWriter(object):
         self.close()
 
     def close(self):
-        self.zipf.writestr("content.xml", self.dom.toxml())
+        self.zipf.writestr("content.xml", self.dom.toxml().encode("utf-8"))
         self.zipf.close()
 
     def writerow(self, cells):
