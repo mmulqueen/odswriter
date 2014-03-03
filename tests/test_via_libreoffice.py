@@ -94,9 +94,11 @@ if command_is_executable(["libreoffice", "--version"]):
             # Again locales may be important.
 
             self.assertEqual(lrows[0][0],"Time")
-            self.assertIn("13",lrows[0][1])
+            self.assertTrue("13" in lrows[0][1] or "01" in lrows[0][1])
             self.assertIn("37",lrows[0][1])
-            self.assertIn("16",lrows[0][2])
+            self.assertNotIn("AM", lrows[0][1])
+            self.assertTrue("16" in lrows[0][2] or "04" in lrows[0][2])
+            self.assertNotIn("AM", lrows[0][2])
             self.assertIn("17",lrows[0][2])
             self.assertIn("18",lrows[0][2])
 
