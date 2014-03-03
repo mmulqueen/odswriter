@@ -61,18 +61,21 @@ class ODSWriter(object):
                 cell.setAttribute("table:style-name", "cTime")
                 text = cell_data.strftime("%H:%M:%S")
 
-            elif isinstance(cell_data, (float, int, decimal.Decimal, long)):
-                cell.setAttribute("office:value-type", "float")
-                float_str = unicode(cell_data)
-                cell.setAttribute("office:value", float_str)
-                text = float_str
-
             elif isinstance(cell_data, bool):
+                # Bool condition must be checked before numeric because:
+                # isinstance(True, int): True
+                # isinstance(True, bool): True
                 cell.setAttribute("office:value-type", "boolean")
                 cell.setAttribute("office:boolean-value",
                                   "true" if cell_data else "false")
                 cell.setAttribute("table:style-name", "cBool")
                 text = "TRUE" if cell_data else "FALSE"
+
+            elif isinstance(cell_data, (float, int, decimal.Decimal, long)):
+                cell.setAttribute("office:value-type", "float")
+                float_str = unicode(cell_data)
+                cell.setAttribute("office:value", float_str)
+                text = float_str
 
             elif isinstance(cell_data, Formula):
                 cell.setAttribute("table:formula", str(cell_data))
