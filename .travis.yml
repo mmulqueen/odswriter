@@ -17,4 +17,3 @@ deploy:
     secure: inxqdbQsdpYp67/7FBVwFwV0PE8Mmm3EN9atVWuZ0swWzFU/gQ7Bv6kYYXl7w5UZP1FXP1wHKupQNWDkt8y3/Zqx6oj32VBPTYDmdIYgWGYKLLc98dz0Jz27jlqJbyY5FZOeg8bJJsFe+4dWJfg1QGWn9dKanj/Q/G3iF2o+6Vg=
   on:
     tags: true
-    repo: mmulqueen/odswriter
