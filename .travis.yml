@@ -1,18 +1,20 @@
 language: python
 python:
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "pypy"
-
-# no deps required for odswriter to work, but I nose2 used for tests.
-
+- '2.7'
+- '3.2'
+- '3.3'
+- pypy
 before_install:
-  - sudo apt-get update -qq
-
+- sudo apt-get update -qq
 install:
-  - sudo apt-get install -qq libreoffice-calc
-  - pip install nose2
-
-# command to run tests
+- sudo apt-get install -qq libreoffice-calc
+- pip install nose2
 script: nose2
+deploy:
+  provider: pypi
+  user: mmulqueen
+  password:
+    secure: inxqdbQsdpYp67/7FBVwFwV0PE8Mmm3EN9atVWuZ0swWzFU/gQ7Bv6kYYXl7w5UZP1FXP1wHKupQNWDkt8y3/Zqx6oj32VBPTYDmdIYgWGYKLLc98dz0Jz27jlqJbyY5FZOeg8bJJsFe+4dWJfg1QGWn9dKanj/Q/G3iF2o+6Vg=
+  on:
+    tags: true
+    repo: mmulqueen/odswriter
