@@ -115,3 +115,18 @@ if command_is_executable(["libreoffice", "--version"]):
                                          ods.Formula("IF(C1=2,B1,C1)"),  # E1
                                          ods.Formula("SUM(B1:D1)")]])  # F1
             self.assertEqual(lrows, [["Formula","1","2","3","1","6"]])
+
+        def test_escape(self):
+            """
+                Make sure that special characters are actually being escaped.
+            """
+            lrows = launder_through_lo([["<table:table-cell>",
+                                         "</table:table-cell>",
+                                         "<br />",
+                                         "&",
+                                         "&amp;"]])
+            self.assertEqual(lrows, [["<table:table-cell>",
+                                      "</table:table-cell>",
+                                      "<br />",
+                                      "&",
+                                      "&amp;"]])
