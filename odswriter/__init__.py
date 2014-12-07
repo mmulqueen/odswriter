@@ -7,6 +7,8 @@ from xml.dom.minidom import parseString
 from . import ods_components
 from .formula import Formula
 
+# Basic compatibility setup for Python 2 and Python 3.
+
 try:
     long
 except NameError:
@@ -17,19 +19,25 @@ try:
 except NameError:
     unicode = str
 
+# End compatibility setup.
+
 
 class ODSWriter(object):
+    """
+    Utility for writing OpenDocument Spreadsheets. Can be used in simple 1 sheet mode (use writerow/writerows) or with
+    multiple sheets (use new_sheet). It is suggested that you use with object like a context manager.
+    """
     def __init__(self, odsfile):
         self.zipf = ZipFile(odsfile, "w")
         # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
-        self.table = self.dom.getElementsByTagName("table:table")[0]
         self.zipf.writestr("manifest.rdf",
                            ods_components.manifest_rdf.encode("utf-8"))
         self.zipf.writestr("mimetype",
                            ods_components.mimetype.encode("utf-8"))
         self.zipf.writestr("META-INF/manifest.xml",
                            ods_components.manifest_xml.encode("utf-8"))
+        self.default_sheet = None
 
     def __enter__(self):
         return self
@@ -38,8 +46,49 @@ class ODSWriter(object):
         self.close()
 
     def close(self):
+        """
+        Finalises the compressed version of the spreadsheet. If you aren't using the context manager ('with' statement,
+        you must call this manually, it is not triggered automatically like on a file object.
+        :return: Nothing.
+        """
         self.zipf.writestr("content.xml", self.dom.toxml().encode("utf-8"))
         self.zipf.close()
+
+    def writerow(self, cells):
+        """
+        Write a row of cells into the default sheet of the spreadsheet.
+        :param cells: A list of cells (most basic Python types supported).
+        :return: Nothing.
+        """
+        if self.default_sheet is None:
+            self.default_sheet = self.new_sheet()
+        self.default_sheet.writerow(cells)
+
+    def writerows(self, rows):
+        """
+        Write rows into the default sheet of the spreadsheet.
+        :param rows: A list of rows, rows are lists of cells - see writerow.
+        :return: Nothing.
+        """
+        for row in rows:
+            self.writerow(row)
+
+    def new_sheet(self, name=None):
+        """
+        Create a new sheet in the spreadsheet and return it so content can be added.
+        :param name: Optional name for the sheet.
+        :return: Sheet object
+        """
+        return Sheet(self.dom, name)
+
+class Sheet(object):
+    def __init__(self, dom, name=None):
+        self.dom = dom
+        spreadsheet = self.dom.getElementsByTagName("office:spreadsheet")[0]
+        self.table = self.dom.createElement("table:table")
+        if name:
+            self.table.setAttribute("table:name",name)
+        spreadsheet.appendChild(self.table)
 
     def writerow(self, cells):
         row = self.dom.createElement("table:table-row")

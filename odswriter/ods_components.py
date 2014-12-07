@@ -23,8 +23,6 @@ content_xml = """<office:document-content xmlns:office="urn:oasis:names:tc:opend
     <style:style style:name="cBool" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="Bool" />
     <office:body>
         <office:spreadsheet>
-            <table:table>
-            </table:table>
         </office:spreadsheet>
     </office:body>
 </office:document-content>"""
