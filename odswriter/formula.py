@@ -1,85 +1,39 @@
-import re
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Michael Mulqueen (http://michael.mulqueen.me.uk/)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 
 class Formula(object):
+    """
+        IMPORTANT NOTE: The formula object currently does no validation on the formula that you supply and it assumes
+        you will supply it with a valid formula.
+
+        For this reason, it's important that you: use . (point, full stop, period) as the decimal separator and ; as the
+        argument separator.
+
+        It is strongly recommended that you test your generated spreadsheets in LibreOffice because odswriter will not
+        warn you of formula related mistakes.
+    """
     def __init__(self, s):
-        self.tokens = lex_fragment(s)
-
-    def __repr__(self):
-        return "".join([self.__class__.__name__, "(", repr(self.tokens), ")"])
+        self.formula_string = s
 
     def __str__(self):
-        return "".join(["of:=",] + [str(token) for token in self.tokens])
-
-class Token(object):
-    def __repr__(self):
-        return "".join([self.__class__.__name__, "(",
-                        ",".join([repr(getattr(self, field)) for field in self.repr_fields]),
-                        ")"])
-
-class Function(Token):
-    repr_fields = ["name", "arguments"]
-    def __init__(self, name, argument_fragment):
-        self.name = name
-        self.arguments = lex_fragment(argument_fragment)
-
-    def __str__(self):
-        arg_str_parts = []
-        last_index = len(self.arguments) - 1
-        for i, arg in enumerate(self.arguments):
-            prev_arg = None
-            if i > 0:
-                prev_arg = self.arguments[i-1]
-            if not (isinstance(prev_arg, Operator)
-                    or prev_arg is None
-                    or isinstance(arg, Operator)):
-                arg_str_parts.append(";")
-            arg_str_parts.append(str(arg))
-
-        return "".join([self.name, "(", "".join(arg_str_parts), ")"])
-
-class Operator(Token):
-    repr_fields = ["operator"]
-
-    def __init__(self, operator):
-        if operator == "==":
-            self.operator = "="
-        elif operator == "!=":
-            self.operator = "<>"
-        else:
-            self.operator = operator
-
-    def __str__(self):
-        return self.operator
-
-
-operator_tokens = ("!=", "<=", ">=", "<>", "==", "+", "-", "*", "/", "^", "%",
-                   "&", "|", ">", "<", "=")
-separator_tokens = (",",";")
-
-def tokenize_fragment(s):
-    if s.startswith("="):
-        s = s[1:]
-    special_char_pattern = re.escape("".join(operator_tokens + separator_tokens))
-    pattern = re.compile("".join([r"\w*\(.+?\)|[\w\:]+|[",
-                                  special_char_pattern,
-                                  r"]+"]))
-    return re.findall(pattern, s)
-
-def lex_fragment(s):
-    tokens = tokenize_fragment(s)
-    lexed_tokens = []
-    function_pattern = re.compile(r"[^\(\)]+")
-    for token in tokens:
-        token_parts = re.findall(function_pattern, token)
-        if len(token_parts) > 1:
-            lexed_tokens.append(Function(*token_parts))
-        elif token in operator_tokens:
-            lexed_tokens.append(Operator(token))
-        elif token in separator_tokens:
-            pass
-        else:
-            try:
-                lexed_tokens.append(float(token))
-            except ValueError:
-                lexed_tokens.append(token)
-    return lexed_tokens
+        return "of:={}".format(self.formula_string)

@@ -1,3 +1,25 @@
+# The MIT License (MIT)
+#
+# Copyright (c) 2014 Michael Mulqueen (http://michael.mulqueen.me.uk/)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from __future__ import unicode_literals
 from zipfile import ZipFile
 import decimal
@@ -81,13 +103,14 @@ class ODSWriter(object):
         """
         return Sheet(self.dom, name)
 
+
 class Sheet(object):
     def __init__(self, dom, name=None):
         self.dom = dom
         spreadsheet = self.dom.getElementsByTagName("office:spreadsheet")[0]
         self.table = self.dom.createElement("table:table")
         if name:
-            self.table.setAttribute("table:name",name)
+            self.table.setAttribute("table:name", name)
         spreadsheet.appendChild(self.table)
 
     def writerow(self, cells):
@@ -151,7 +174,7 @@ class Sheet(object):
             self.writerow(row)
 
 
-def writer(odsfile, *args, **kwargs):
+def writer(odsfile):
     """
         Returns an ODSWriter object.
 
@@ -161,4 +184,4 @@ def writer(odsfile, *args, **kwargs):
         ...
         Otherwise you will get "TypeError: must be str, not bytes"
     """
-    return ODSWriter(odsfile, *args, **kwargs)
+    return ODSWriter(odsfile)
