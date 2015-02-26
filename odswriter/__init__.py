@@ -37,6 +37,8 @@ class ODSWriter(object):
                            ods_components.mimetype.encode("utf-8"))
         self.zipf.writestr("META-INF/manifest.xml",
                            ods_components.manifest_xml.encode("utf-8"))
+        self.zipf.writestr("styles.xml",
+                           ods_components.styles_xml.encode("utf-8"))
         self.default_sheet = None
 
     def __enter__(self):
@@ -82,12 +84,13 @@ class ODSWriter(object):
         return Sheet(self.dom, name)
 
 class Sheet(object):
-    def __init__(self, dom, name=None):
+    def __init__(self, dom, name="Sheet 1"):
         self.dom = dom
         spreadsheet = self.dom.getElementsByTagName("office:spreadsheet")[0]
         self.table = self.dom.createElement("table:table")
         if name:
-            self.table.setAttribute("table:name",name)
+            self.table.setAttribute("table:name", name)
+        self.table.setAttribute("table:style-name", "ta1")
         spreadsheet.appendChild(self.table)
 
     def writerow(self, cells):
