@@ -31,8 +31,6 @@ class ODSWriter(object):
         self.zipf = ZipFile(odsfile, "w")
         # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
-        self.zipf.writestr("manifest.rdf",
-                           ods_components.manifest_rdf.encode("utf-8"))
         self.zipf.writestr("mimetype",
                            ods_components.mimetype.encode("utf-8"))
         self.zipf.writestr("META-INF/manifest.xml",
