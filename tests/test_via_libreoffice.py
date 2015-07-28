@@ -116,6 +116,15 @@ if command_is_executable(["libreoffice", "--version"]):
                                          ods.Formula("SUM(B1:D1)")]])  # F1
             self.assertEqual(lrows, [["Formula","1","2","3","1","6"]])
 
+        def test_nested_formula(self):
+            lrows = launder_through_lo([["Formula",  # A1
+                                         1,  # B1
+                                         2,  # C1
+                                         3,  # D1
+                                         ods.Formula("IF(C1=2,MIN(B1:D1),MAX(B1:D1)"),  # E1
+                                         ods.Formula("IF(C1=3,MIN(B1:D1),MAX(B1:D1)")]])  # F1
+            self.assertEqual(lrows, [["Formula","1","2","3","1","3"]])
+
         def test_escape(self):
             """
                 Make sure that special characters are actually being escaped.
