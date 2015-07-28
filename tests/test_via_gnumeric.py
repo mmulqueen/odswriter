@@ -1,7 +1,7 @@
 
 # The MIT License (MIT)
 #
-# Copyright (c) 2015 Michael Mulqueen (http://michael.mulqueen.me.uk/)
+# Copyright (c) 2014 Michael Mulqueen (http://michael.mulqueen.me.uk/)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@ import datetime
 
 import odswriter as ods
 
+
 class TempDir(object):
     """
         A simple context manager for temporary directories.
@@ -48,6 +49,7 @@ class TempDir(object):
     def __exit__(self, *args, **kwargs):
         shutil.rmtree(self.path)
 
+
 def command_is_executable(args):
     try:
         subprocess.call(args)
@@ -55,38 +57,37 @@ def command_is_executable(args):
     except OSError:
         return False
 
-def launder_through_lo(rows):
+
+def launder_through_gnumeric(rows):
     """
-        Saves rows into an ods, uses LibreOffice to convert to a CSV and loads
+        Saves rows into an ods, uses ssconvert (based on gnumeric) to convert to a CSV and loads
         the rows from that CSV.
     """
     with TempDir() as d:
         # Make an ODS
         temp_ods = os.path.join(d.path, "test.ods")
+        temp_csv = os.path.join(d.path, "test.csv")
         with ods.writer(open(temp_ods, "wb")) as odsfile:
             odsfile.writerows(rows)
 
         # Convert it to a CSV
-        p = subprocess.Popen(["libreoffice", "--headless", "--convert-to",
-                              "csv", "test.ods"],
-                             cwd=d.path)
+        p = subprocess.Popen(["ssconvert", temp_ods, temp_csv])
 
         p.wait()
 
         # Read the CSV
-        temp_csv = os.path.join(d.path,"test.csv")
         csvfile =  csv.reader(open(temp_csv))
         return list(csvfile)
 
 
-if command_is_executable(["libreoffice", "--version"]):
-    class TestViaLibreOffice(TestCase):
+if command_is_executable(["ssconvert", "--version"]):
+    class TestViaGnumeric(TestCase):
         def test_string(self):
-            lrows = launder_through_lo([["String", "ABCDEF123456", "123456"]])
+            lrows = launder_through_gnumeric([["String", "ABCDEF123456", "123456"]])
             self.assertEqual(lrows,[["String", "ABCDEF123456", "123456"]])
 
         def test_numeric(self):
-            lrows = launder_through_lo([["Float",
+            lrows = launder_through_gnumeric([["Float",
                                          1,
                                          123,
                                          123.123,
@@ -98,7 +99,7 @@ if command_is_executable(["libreoffice", "--version"]):
                                "123.123",
                                "10.321"]])
         def test_datetime(self):
-            lrows = launder_through_lo([["Date/DateTime",
+            lrows = launder_through_gnumeric([["Date/DateTime",
                                          datetime.date(1989,11,9)]])
 
             # Locales may effect how LibreOffice outputs the dates, so I'll
@@ -110,28 +111,28 @@ if command_is_executable(["libreoffice", "--version"]):
             self.assertIn("09", lrows[0][1])
 
         def test_time(self):
-            lrows = launder_through_lo([["Time",
+            lrows = launder_through_gnumeric([["Time",
                                          datetime.time(13,37),
                                          datetime.time(16,17,18)]])
 
             # Again locales may be important.
 
             self.assertEqual(lrows[0][0],"Time")
-            self.assertTrue("13" in lrows[0][1] or "01" in lrows[0][1])
+            self.assertTrue("13" in lrows[0][1] or "1:" in lrows[0][1])
             self.assertIn("37",lrows[0][1])
             self.assertNotIn("AM", lrows[0][1])
-            self.assertTrue("16" in lrows[0][2] or "04" in lrows[0][2])
+            self.assertTrue("16" in lrows[0][2] or "4:" in lrows[0][2])
             self.assertNotIn("AM", lrows[0][2])
             self.assertIn("17",lrows[0][2])
             self.assertIn("18",lrows[0][2])
 
         def test_bool(self):
-            lrows = launder_through_lo([["Bool",True,False,True]])
+            lrows = launder_through_gnumeric([["Bool",True,False,True]])
 
             self.assertEqual(lrows,[["Bool", "TRUE", "FALSE", "TRUE"]])
 
         def test_formula(self):
-            lrows = launder_through_lo([["Formula",  # A1
+            lrows = launder_through_gnumeric([["Formula",  # A1
                                          1,  # B1
                                          2,  # C1
                                          3,  # D1
@@ -140,7 +141,7 @@ if command_is_executable(["libreoffice", "--version"]):
             self.assertEqual(lrows, [["Formula","1","2","3","1","6"]])
 
         def test_nested_formula(self):
-            lrows = launder_through_lo([["Formula",  # A1
+            lrows = launder_through_gnumeric([["Formula",  # A1
                                          1,  # B1
                                          2,  # C1
                                          3,  # D1
@@ -152,7 +153,7 @@ if command_is_executable(["libreoffice", "--version"]):
             """
                 Make sure that special characters are actually being escaped.
             """
-            lrows = launder_through_lo([["<table:table-cell>",
+            lrows = launder_through_gnumeric([["<table:table-cell>",
                                          "</table:table-cell>",
                                          "<br />",
                                          "&",

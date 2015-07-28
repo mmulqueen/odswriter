@@ -5,19 +5,13 @@ content_xml = """<office:document-content xmlns:office="urn:oasis:names:tc:opend
         <style:style style:name="ta1" style:family="table">
             <style:table-properties table:display="true" style:writing-mode="lr-tb"/>
         </style:style>
+        <style:style style:name="odswriterTime" style:family="table-cell" style:data-style-name="odswriterStyleXMLTime"/>
         <number:date-style style:name="DateISO" number:automatic-order="true">
             <number:year />
             <number:text>-</number:text>
             <number:month number:style="long" />
             <number:text>-</number:text>
             <number:day number:style="long" />
-        </number:date-style>
-        <number:date-style style:name="Time" number:automatic-order="true">
-            <number:hour number:style="long" />
-            <number:text>:</number:text>
-            <number:minute number:style="long" />
-            <number:text>:</number:text>
-            <number:second number:style="long" />
         </number:date-style>
         <number:boolean-style style:name="Bool">
             <number:boolean />
@@ -62,4 +56,19 @@ manifest_xml = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 styles_xml = """<?xml version="1.0" encoding="UTF-8"?>
-<office:document-styles xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" office:version="1.2" />"""
+<office:document-styles
+    xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+    xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"
+    office:version="1.2">
+    <office:styles>
+        <number:time-style style:name="odswriterStyleXMLTime"
+                           number:format-source="fixed">
+            <number:hours number:style="long"/>
+            <number:text>:</number:text>
+            <number:minutes number:style="long"/>
+            <number:text>:</number:text>
+            <number:seconds number:style="long"/>
+        </number:time-style>
+    </office:styles>
+</office:document-styles>
+"""

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
 
 class Formula(object):
     """
@@ -36,4 +37,12 @@ class Formula(object):
         self.formula_string = s
 
     def __str__(self):
-        return "of:={}".format(self.formula_string)
+        s = self.formula_string
+        # Remove = sign if present
+        if s.startswith("="):
+            s = s[1:]
+        # Wrap cell refs in square brackets.
+        s = re.sub(r"([A-Z]+[0-9]+(:[A-Z]+[0-9]+)?)", r"[\1]", s)
+        # Place a . before cell references, so for example . A2 becomes .A2
+        s = re.sub(r"([A-Z]+[0-9]+)(?!\()", r".\1", s)
+        return "of:={}".format(s)

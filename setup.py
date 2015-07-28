@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name="odswriter",
-      version="0.2.0",
+      version="0.3.0",
       description="A pure-Python module for writing OpenDocument spreadsheets (similar to csv.writer).",
       author="Michael Mulqueen",
       author_email="michael@mulqueen.me.uk",
