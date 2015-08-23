@@ -59,6 +59,7 @@ styles_xml = """<?xml version="1.0" encoding="UTF-8"?>
 <office:document-styles
     xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
     xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0"
+    xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
     office:version="1.2">
     <office:styles>
         <number:time-style style:name="odswriterStyleXMLTime"

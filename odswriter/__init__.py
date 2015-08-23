@@ -38,6 +38,7 @@ class ODSWriter(object):
         self.zipf.writestr("styles.xml",
                            ods_components.styles_xml.encode("utf-8"))
         self.default_sheet = None
+        self.sheets = []
 
     def __enter__(self):
         return self
@@ -73,26 +74,45 @@ class ODSWriter(object):
         for row in rows:
             self.writerow(row)
 
-    def new_sheet(self, name=None):
+    def new_sheet(self, name=None, cols=None):
         """
         Create a new sheet in the spreadsheet and return it so content can be added.
         :param name: Optional name for the sheet.
+        :param cols: Specify the number of columns, needed for compatibility in some cases
         :return: Sheet object
         """
-        return Sheet(self.dom, name)
+        sheet = Sheet(self.dom, name, cols)
+        self.sheets.append(sheet)
+        return sheet
+
 
 class Sheet(object):
-    def __init__(self, dom, name="Sheet 1"):
+    def __init__(self, dom, name="Sheet 1", cols=None):
         self.dom = dom
+        self.cols = cols
         spreadsheet = self.dom.getElementsByTagName("office:spreadsheet")[0]
         self.table = self.dom.createElement("table:table")
         if name:
             self.table.setAttribute("table:name", name)
         self.table.setAttribute("table:style-name", "ta1")
+
+        if self.cols is not None:
+            col = self.dom.createElement("table:table-column")
+            col.setAttribute("table:number-columns-repeated", unicode(self.cols))
+            self.table.appendChild(col)
+
         spreadsheet.appendChild(self.table)
 
     def writerow(self, cells):
         row = self.dom.createElement("table:table-row")
+        content_cells = len(cells)
+
+        if self.cols is not None:
+            padding_cells = self.cols - content_cells
+            if content_cells > self.cols:
+                raise Exception("More cells than cols.")
+            cells += [None]*padding_cells
+
         for cell_data in cells:
             cell = self.dom.createElement("table:table-cell")
             text = None
