@@ -44,6 +44,7 @@ with ods.writer(open("test-multi.ods","wb")) as odsfile:
     sloths = odsfile.new_sheet("Sloths")
     sloths.writerow(["Pygmy Three-Toed Sloth", "Maned Sloth", "Pale-Throated Sloth", "Brown-Throated Sloth",
                      "Linneaeus's Two-Twoed Sloth", "Hoffman's Two-Toed Sloth"])
+```
 
 Compatibility
 -------------
