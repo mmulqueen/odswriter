@@ -1,5 +1,5 @@
 from __future__ import unicode_literals
-from zipfile import ZipFile
+from zipfile import ZipFile, ZIP_STORED
 import decimal
 import datetime
 from xml.dom.minidom import parseString
@@ -27,8 +27,8 @@ class ODSWriter(object):
     Utility for writing OpenDocument Spreadsheets. Can be used in simple 1 sheet mode (use writerow/writerows) or with
     multiple sheets (use new_sheet). It is suggested that you use with object like a context manager.
     """
-    def __init__(self, odsfile):
-        self.zipf = ZipFile(odsfile, "w")
+    def __init__(self, odsfile, compression=ZIP_STORED):
+        self.zipf = ZipFile(odsfile, "w", compression)
         # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
         self.zipf.writestr("mimetype",
