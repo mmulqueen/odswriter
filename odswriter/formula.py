@@ -42,7 +42,15 @@ class Formula(object):
         if s.startswith("="):
             s = s[1:]
         # Wrap cell refs in square brackets.
-        s = re.sub(r"([A-Z]+[0-9]+(:[A-Z]+[0-9]+)?)", r"[\1]", s)
+        s = re.sub(
+            r"(\"(?:[^\"]|\"\")*\")|([A-Z]+[0-9]+(?::[A-Z]+[0-9]+)?)",
+            lambda m: m.group(1) or "[{}]".format(m.group(2)),
+            s
+        )
         # Place a . before cell references, so for example . A2 becomes .A2
-        s = re.sub(r"([A-Z]+[0-9]+)(?!\()", r".\1", s)
+        s = re.sub(
+            r"(\"(?:[^\"]|\"\")*\")|([A-Z]+[0-9]+)(?!\()",
+            lambda m: m.group(1) or r".{}".format(m.group(2)),
+            s
+        )
         return "of:={}".format(s)
