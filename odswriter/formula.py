@@ -22,6 +22,15 @@
 
 import re
 
+
+try:
+    unicode
+except NameError:
+    _convert_unicode = False
+else:
+    _convert_unicode = True
+
+
 class Formula(object):
     """
         IMPORTANT NOTE: The formula object currently does no validation on the formula that you supply and it assumes
@@ -36,7 +45,17 @@ class Formula(object):
     def __init__(self, s):
         self.formula_string = s
 
+    def __repr__(self):
+        return "Formula({!r})".format(self.formula_string)
+
     def __str__(self):
+        result = self.__unicode__()
+        if _convert_unicode:
+            return result.encode("UTF-8")
+        else:
+            return result
+
+    def __unicode__(self):
         s = self.formula_string
         # Remove = sign if present
         if s.startswith("="):
@@ -45,4 +64,4 @@ class Formula(object):
         s = re.sub(r"([A-Z]+[0-9]+(:[A-Z]+[0-9]+)?)", r"[\1]", s)
         # Place a . before cell references, so for example . A2 becomes .A2
         s = re.sub(r"([A-Z]+[0-9]+)(?!\()", r".\1", s)
-        return "of:={}".format(s)
+        return u"of:={}".format(s)

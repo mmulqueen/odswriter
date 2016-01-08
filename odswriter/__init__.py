@@ -148,7 +148,7 @@ class Sheet(object):
                 text = float_str
 
             elif isinstance(cell_data, Formula):
-                cell.setAttribute("table:formula", str(cell_data))
+                cell.setAttribute("table:formula", unicode(cell_data))
 
             elif cell_data is None:
                 pass  # Empty element
