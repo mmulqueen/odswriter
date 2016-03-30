@@ -105,13 +105,7 @@ class Sheet(object):
 
     def writerow(self, cells):
         row = self.dom.createElement("table:table-row")
-        content_cells = len(cells)
-
-        if self.cols is not None:
-            padding_cells = self.cols - content_cells
-            if content_cells > self.cols:
-                raise Exception("More cells than cols.")
-            cells += [None]*padding_cells
+        content_cells = 0
 
         for cell_data in cells:
             cell = self.dom.createElement("table:table-cell")
@@ -164,6 +158,16 @@ class Sheet(object):
                 cell.appendChild(p)
 
             row.appendChild(cell)
+
+            content_cells += 1
+
+        if self.cols is not None:
+            if content_cells > self.cols:
+                raise Exception("More cells than cols.")
+
+            for _ in range(content_cells, self.cols):
+                cell = self.dom.createElement("table:table-cell")
+                row.appendChild(cell)
 
         self.table.appendChild(row)
 
