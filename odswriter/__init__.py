@@ -153,9 +153,20 @@ class Sheet(object):
                 text = unicode(cell_data)
 
             if text:
-                p = self.dom.createElement("text:p")
-                p.appendChild(self.dom.createTextNode(text))
-                cell.appendChild(p)
+                # Multiline strings mean multiple text:p elements
+                # TODO: Handle different sorts of carriage returns properly
+                # https://stackoverflow.com/questions/1059559/split-strings-with-multiple-delimiters
+                # TODO: If there are multi lines, automatically turn on text wrapping
+
+                multiline = False
+
+                for datum in text.split('\n'):
+                    if multiline:
+                        cell.setAttribute("fo:wrap-option", "wrap")
+                    p = self.dom.createElement("text:p")
+                    p.appendChild(self.dom.createTextNode(datum))
+                    cell.appendChild(p)
+                    multiline = True
 
             row.appendChild(cell)
 
