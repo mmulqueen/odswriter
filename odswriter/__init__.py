@@ -85,11 +85,28 @@ class ODSWriter(object):
         self.sheets.append(sheet)
         return sheet
 
+# Note the way the columns are described in the XML file, specifically, how they're repeated.
+# Say that ONLY the 3rd row out of 6 has a custom style.  They would specify rows
+# 1 with a certain style and "table:number-columns-repeated" as 2.  Then they would
+# specify the column with the custom style, then they would specify the following
+# column with another "table:number-columns-repeated" attrribute.
+
+# The code just appends cells to rows, without regard as to which column it is.
+
+# <style:style style:name="co2" style:family="table-column">
+#      <style:table-column-properties fo:break-before="auto" style:column-width="81.04pt"/>
+#    </style:style>
+
+ #<table:table-column table:style-name="co2" table:default-cell-style-name="Default"/>
 
 class Sheet(object):
     def __init__(self, dom, name="Sheet 1", cols=None):
         self.dom = dom
         self.cols = cols
+        self.max_cols_content = 0
+        self.col_widths = []
+        self.sheet_name = name
+        self.width_factor = 10  # Number of points each charachter is wide
         spreadsheet = self.dom.getElementsByTagName("office:spreadsheet")[0]
         self.table = self.dom.createElement("table:table")
         if name:
@@ -103,13 +120,39 @@ class Sheet(object):
 
         spreadsheet.appendChild(self.table)
 
+    def __del__(self):
+    
+        styles = self.dom.getElementsByTagName("office:automatic-styles")
+        first_row = self.current_sheet.getElementsByTagName("table:table-row")[0]
+        current_sheet = self.dom.getElementsByTagName("table:table")[0]
+                
+        for i in range(0, self.max_cols_content):
+            style = self.dom.createElement("style:style")
+            style.setAttribute("style:name", "col" + str(i))
+            style.setAttribute("style:amily", "table-column")
+            styleprops = self.dom.createElement("style:table-column-properties")
+            styleprops.setAttribute("fo:break-before", "auto")
+            styleprops.setAttribute("style_column-width", str(self.col_widths[i]) + "pt")
+            style.appendChild(styleprops)
+            styles.appendChild(style)
+
+        for i in range(0, self.max_cols_content):
+            col = self.dom.createElement("table:table-column")
+            col.setAttribute("table:style-name", "col" + str(i))
+            col.setAttribute("table:default-cell-style-name", "Default")
+            self.current_sheet.insertBefore(col, first_row)
+
+        
+
     def writerow(self, cells):
         row = self.dom.createElement("table:table-row")
         content_cells = 0
+        self.col_widths = []
 
         for cell_data in cells:
             cell = self.dom.createElement("table:table-cell")
             text = None
+            curr_cell_width = 0
 
             if isinstance(cell_data, (datetime.date, datetime.datetime)):
                 cell.setAttribute("office:value-type", "date")
@@ -166,11 +209,15 @@ class Sheet(object):
                     p = self.dom.createElement("text:p")
                     p.appendChild(self.dom.createTextNode(datum))
                     cell.appendChild(p)
+                    if curr_cell_width < len(datum):
+                        curr_cell_width = len(datum)
                     multiline = True
 
             row.appendChild(cell)
 
+            self.col_widths[content_cells] = curr_cell_width
             content_cells += 1
+            curr_cell_width = 0
 
         if self.cols is not None:
             if content_cells > self.cols:
@@ -180,6 +227,19 @@ class Sheet(object):
                 cell = self.dom.createElement("table:table-cell")
                 row.appendChild(cell)
 
+        if content_cells > self.max_cols_content:
+            self.max_cols_content = content_cells
+
+# At the end of the above loop, we'll have a series of col_widths.  When the loop is done...
+# we need to a) add a style with the new length, and b) set each column to this new style.
+# We'll need to put this part after all the writeRows are done.  But we can't at this level,
+# sor for each write row we need to:
+#       for each column we need to:
+#           1. Get column width from col_widths
+#           2. Consult its current style to see what the width is
+#           3. If that width is too small, update the style to the new larger size
+# Actually, no, do this via the destructor above.
+        
         self.table.appendChild(row)
 
     def writerows(self, rows):
