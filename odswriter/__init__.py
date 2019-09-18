@@ -204,7 +204,6 @@ class Sheet(object):
                 # Multiline strings mean multiple text:p elements
                 # TODO: Handle different sorts of carriage returns properly
                 # https://stackoverflow.com/questions/1059559/split-strings-with-multiple-delimiters
-                # TODO: If there are multi lines, automatically turn on text wrapping
 
                 multiline = False
                 chop_line = False
@@ -230,11 +229,9 @@ class Sheet(object):
             
             row.appendChild(cell)
 
-            #self.col_widths[content_cells] = curr_cell_width
             curr_cell_width *= self.width_factor
             
             if len(self.col_widths) > content_cells and len(self.col_widths) > 0:
-                # We've already written a row so this should be populated
                 if self.col_widths[content_cells] < curr_cell_width:
                     self.col_widths[content_cells] = curr_cell_width
             else:
@@ -253,16 +250,6 @@ class Sheet(object):
 
         if content_cells > self.max_cols_content:
             self.max_cols_content = content_cells
-
-# At the end of the above loop, we'll have a series of col_widths.  When the loop is done...
-# we need to a) add a style with the new length, and b) set each column to this new style.
-# We'll need to put this part after all the writeRows are done.  But we can't at this level,
-# sor for each write row we need to:
-#       for each column we need to:
-#           1. Get column width from col_widths
-#           2. Consult its current style to see what the width is
-#           3. If that width is too small, update the style to the new larger size
-# Actually, no, do this via the destructor above.
         
         self.table.appendChild(row)
         self.first_row_bold = False
