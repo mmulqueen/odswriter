@@ -54,16 +54,16 @@ class ODSWriter(object):
         you must call this manually, it is not triggered automatically like on a file object.
         :return: Nothing.
         """
-        
+
         if self.default_sheet is not None:
             self.default_sheet.finalizeFormat(1)
         sheet_index = 2
         for finalSheet in self.sheets:
             finalSheet.finalizeFormat(sheet_index)
             sheet_index += 1
-        
+
         xmlContent = self.dom.toprettyxml(encoding="utf-8")
-        open("TestXML.xml", "w").write(xmlContent)
+        open("TestXML.xml", "wb").write(xmlContent)
         self.zipf.writestr("content.xml", self.dom.toxml().encode("utf-8"))
         self.zipf.close()
 
@@ -128,10 +128,10 @@ class Sheet(object):
         spreadsheet.appendChild(self.table)
 
     def finalizeFormat(self, sheet_index):
-    
+
         styles = self.dom.getElementsByTagName("office:automatic-styles")[0]
         first_row = self.table.getElementsByTagName("table:table-row")[0]
-                
+
         for i in range(0, self.max_cols_content):
             style = self.dom.createElement("style:style")
             style.setAttribute("style:name", "sh" + str(sheet_index) + "col" + str(i))
@@ -148,7 +148,7 @@ class Sheet(object):
             col.setAttribute("table:default-cell-style-name", "Default")
             self.table.insertBefore(col, first_row)
 
-        
+
 
     def writerow(self, cells):
         row = self.dom.createElement("table:table-row")
@@ -219,24 +219,24 @@ class Sheet(object):
                     if curr_cell_width < len(datum):
                         curr_cell_width = len(datum)
                     multiline = True
-                
+
                 if chop_line and len(datum.strip()) >= 20:
                     curr_cell_width = 20
 
             if self.first_row_bold:
                 cell.setAttribute("table:style-name", "boldStyle")
-            
-            
+
+
             row.appendChild(cell)
 
             curr_cell_width *= self.width_factor
-            
+
             if len(self.col_widths) > content_cells and len(self.col_widths) > 0:
                 if self.col_widths[content_cells] < curr_cell_width:
                     self.col_widths[content_cells] = curr_cell_width
             else:
                 self.col_widths.append(curr_cell_width)
-            
+
             content_cells += 1
             curr_cell_width = 0
 
@@ -250,7 +250,7 @@ class Sheet(object):
 
         if content_cells > self.max_cols_content:
             self.max_cols_content = content_cells
-        
+
         self.table.appendChild(row)
         self.first_row_bold = False
 
