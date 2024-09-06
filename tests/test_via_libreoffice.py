@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from unittest import TestCase
+import unittest
 
 import tempfile
 import os
@@ -79,86 +79,86 @@ def launder_through_lo(rows):
         return list(csvfile)
 
 
-if command_is_executable(["libreoffice", "--version"]):
-    class TestViaLibreOffice(TestCase):
-        def test_string(self):
-            lrows = launder_through_lo([["String", "ABCDEF123456", "123456"]])
-            self.assertEqual(lrows,[["String", "ABCDEF123456", "123456"]])
+@unittest.skipUnless(command_is_executable(["libreoffice", "--version"]), "LibreOffice not found")
+class TestViaLibreOffice(unittest.TestCase):
+    def test_string(self):
+        lrows = launder_through_lo([["String", "ABCDEF123456", "123456"]])
+        self.assertEqual(lrows,[["String", "ABCDEF123456", "123456"]])
 
-        def test_numeric(self):
-            lrows = launder_through_lo([["Float",
-                                         1,
-                                         123,
-                                         123.123,
-                                         decimal.Decimal("10.321")]])
-            self.assertEqual(lrows,
-                             [["Float",
-                               "1",
-                               "123",
-                               "123.123",
-                               "10.321"]])
-        def test_datetime(self):
-            lrows = launder_through_lo([["Date/DateTime",
-                                         datetime.date(1989,11,9)]])
+    def test_numeric(self):
+        lrows = launder_through_lo([["Float",
+                                     1,
+                                     123,
+                                     123.123,
+                                     decimal.Decimal("10.321")]])
+        self.assertEqual(lrows,
+                         [["Float",
+                           "1",
+                           "123",
+                           "123.123",
+                           "10.321"]])
+    def test_datetime(self):
+        lrows = launder_through_lo([["Date/DateTime",
+                                     datetime.date(1989,11,9)]])
 
-            # Locales may effect how LibreOffice outputs the dates, so I'll
-            # settle for checking for the presence of substrings.
+        # Locales may effect how LibreOffice outputs the dates, so I'll
+        # settle for checking for the presence of substrings.
 
-            self.assertEqual(lrows[0][0],"Date/DateTime")
-            self.assertIn("1989", lrows[0][1])
-            self.assertIn("11", lrows[0][1])
-            self.assertIn("09", lrows[0][1])
+        self.assertEqual(lrows[0][0],"Date/DateTime")
+        self.assertIn("1989", lrows[0][1])
+        self.assertIn("11", lrows[0][1])
+        self.assertIn("09", lrows[0][1])
 
-        def test_time(self):
-            lrows = launder_through_lo([["Time",
-                                         datetime.time(13,37),
-                                         datetime.time(16,17,18)]])
+    def test_time(self):
+        lrows = launder_through_lo([["Time",
+                                     datetime.time(13,37),
+                                     datetime.time(16,17,18)]])
 
-            # Again locales may be important.
+        # Again locales may be important.
 
-            self.assertEqual(lrows[0][0],"Time")
-            self.assertTrue("13" in lrows[0][1] or "01" in lrows[0][1])
-            self.assertIn("37",lrows[0][1])
-            self.assertNotIn("AM", lrows[0][1])
-            self.assertTrue("16" in lrows[0][2] or "04" in lrows[0][2])
-            self.assertNotIn("AM", lrows[0][2])
-            self.assertIn("17",lrows[0][2])
-            self.assertIn("18",lrows[0][2])
+        self.assertEqual(lrows[0][0],"Time")
+        self.assertTrue("13" in lrows[0][1] or "01" in lrows[0][1])
+        self.assertIn("37",lrows[0][1])
+        self.assertNotIn("AM", lrows[0][1])
+        self.assertTrue("16" in lrows[0][2] or "04" in lrows[0][2])
+        self.assertNotIn("AM", lrows[0][2])
+        self.assertIn("17",lrows[0][2])
+        self.assertIn("18",lrows[0][2])
 
-        def test_bool(self):
-            lrows = launder_through_lo([["Bool",True,False,True]])
+    def test_bool(self):
+        lrows = launder_through_lo([["Bool",True,False,True]])
 
-            self.assertEqual(lrows,[["Bool", "TRUE", "FALSE", "TRUE"]])
+        self.assertEqual(lrows,[["Bool", "TRUE", "FALSE", "TRUE"]])
 
-        def test_formula(self):
-            lrows = launder_through_lo([["Formula",  # A1
-                                         1,  # B1
-                                         2,  # C1
-                                         3,  # D1
-                                         ods.Formula("IF(C1=2;B1;C1)"),  # E1
-                                             ods.Formula("SUM(B1:D1)")]])  # F1
-            self.assertEqual(lrows, [["Formula","1","2","3","1","6"]])
+    def test_formula(self):
+        lrows = launder_through_lo([["Formula",  # A1
+                                     1,  # B1
+                                     2,  # C1
+                                     3,  # D1
+                                     ods.Formula("IF(C1=2;B1;C1)"),  # E1
+                                         ods.Formula("SUM(B1:D1)")]])  # F1
+        self.assertEqual(lrows, [["Formula","1","2","3","1","6"]])
 
-        def test_nested_formula(self):
-            lrows = launder_through_lo([["Formula",  # A1
-                                         1,  # B1
-                                         2,  # C1
-                                         3,  # D1
-                                         ods.Formula("IF(C1=2;MIN(B1:D1);MAX(B1:D1))"),  # E1
-                                         ods.Formula("IF(C1=3;MIN(B1:D1);MAX(B1:D1))")]])  # F1
-            self.assertEqual(lrows, [["Formula","1","2","3","1","3"]])
+    def test_nested_formula(self):
+        lrows = launder_through_lo([["Formula",  # A1
+                                     1,  # B1
+                                     2,  # C1
+                                     3,  # D1
+                                     ods.Formula("IF(C1=2;MIN(B1:D1);MAX(B1:D1))"),  # E1
+                                     ods.Formula("IF(C1=3;MIN(B1:D1);MAX(B1:D1))")]])  # F1
+        self.assertEqual(lrows, [["Formula","1","2","3","1","3"]])
 
-        def test_escape(self):
-            """
-                Make sure that special characters are actually being escaped.
-            """
-            lrows = launder_through_lo([["<table:table-cell>",
-                                         "</table:table-cell>",
-                                         "<br />",
-                                         "&",
-                                         "&amp;"]])
-            self.assertEqual(lrows, [["<table:table-cell>",
-                                      "</table:table-cell>",
-                                      "<br />",
-                                      "&",
-                                      "&amp;"]])
+    def test_escape(self):
+        """
+            Make sure that special characters are actually being escaped.
+        """
+        lrows = launder_through_lo([["<table:table-cell>",
+                                     "</table:table-cell>",
+                                     "<br />",
+                                     "&",
+                                     "&amp;"]])
+        self.assertEqual(lrows, [["<table:table-cell>",
+                                  "</table:table-cell>",
+                                  "<br />",
+                                  "&",
+                                  "&amp;"]])

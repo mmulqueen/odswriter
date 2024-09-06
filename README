@@ -3,8 +3,6 @@ odswriter
 
 A pure-Python module for writing OpenDocument spreadsheets (similar to csv.writer).
 
-[![Build Status](https://travis-ci.org/mmulqueen/odswriter.png?branch=master)](https://travis-ci.org/mmulqueen/odswriter)
-
 Features
 -------------
  - Pure python
@@ -44,6 +42,7 @@ with ods.writer(open("test-multi.ods","wb")) as odsfile:
     sloths = odsfile.new_sheet("Sloths")
     sloths.writerow(["Pygmy Three-Toed Sloth", "Maned Sloth", "Pale-Throated Sloth", "Brown-Throated Sloth",
                      "Linneaeus's Two-Twoed Sloth", "Hoffman's Two-Toed Sloth"])
+```
 
 Compatibility
 -------------

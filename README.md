@@ -3,8 +3,6 @@ odswriter
 
 A pure-Python module for writing OpenDocument spreadsheets (similar to csv.writer).
 
-[![Build Status](https://travis-ci.org/mmulqueen/odswriter.png?branch=master)](https://travis-ci.org/mmulqueen/odswriter)
-
 Features
 -------------
  - Pure python
