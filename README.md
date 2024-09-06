@@ -1,6 +1,8 @@
 odswriter
 =========
 
+**Consider alternatives:** This library is no longer actively maintained.
+
 A pure-Python module for writing OpenDocument spreadsheets (similar to csv.writer).
 
 Features
@@ -9,7 +11,8 @@ Features
  - Automatically converts Python types into OpenDocument equivalents
  - Includes support for datetime, date and time types
  - Includes support for Decimal type
- - Compatible with Python 2.7 and 3.3 (and probably others)
+ - Tested on Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12. 
+ - Probably still compatible with Python 2.7 and 3.3, but no longer tested.
  - Support for writing formulae (but not evaluating their results)
 
 License
@@ -46,8 +49,7 @@ with ods.writer(open("test-multi.ods","wb")) as odsfile:
 
 Compatibility
 -------------
-Odswriter is tested (see Travis CI) for compatibility with LibreOffice and Gnumeric. Compatibility with OpenOffice
-should be good.
+Odswriter is tested for compatibility with LibreOffice and Gnumeric. 
 
 jOpenDocument is not compatible out-of-the-box, but by specifying the number of columns (odswriter will pad with empty
 cells up to that number) it can be made compatible. Code example:
