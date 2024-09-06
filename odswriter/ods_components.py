@@ -16,6 +16,12 @@ content_xml = """<office:document-content xmlns:office="urn:oasis:names:tc:opend
         <number:boolean-style style:name="Bool">
             <number:boolean />
         </number:boolean-style>
+        <style:style style:name="wrapStyle" style:family="table-cell" style:parent-style-name="Default">
+              <style:table-cell-properties fo:wrap-option="wrap"/>
+        </style:style>
+        <style:style style:name="boldStyle" style:family="table-cell" style:parent-style-name="Default">
+            <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+        </style:style>
         <style:style style:name="cDateISO" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="DateISO" />
         <style:style style:name="cTime" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="Time" />
         <style:style style:name="cBool" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="Bool" />
