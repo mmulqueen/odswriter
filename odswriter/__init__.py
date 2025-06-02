@@ -232,10 +232,9 @@ def writer(odsfile, *args, **kwargs):
         ...
         Otherwise you will get "TypeError"
     """
-    with open("test.ods", "wb") as f:
-        f.name
-    # FODS mode
     if odsfile.name.endswith(".fods"):
+        # FODS mode
         return FODSWriter(odsfile, *args, **kwargs)
     else:
+        # ODS mode
         return ODSWriter(odsfile, *args, **kwargs)
