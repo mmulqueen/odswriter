@@ -120,7 +120,7 @@ class FODSWriter(BaseWriter):
     
     def close(self):
         """
-        Finalises the compressed version of the spreadsheet. If you aren't using the context 
+        Finalises the flat version of the spreadsheet. If you aren't using the context 
         manager ('with' statement, you must call this manually, it is not triggered automatically 
         like on a file object.
         :return: Nothing.
