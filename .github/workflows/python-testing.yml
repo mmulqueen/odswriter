@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v4
@@ -24,7 +24,9 @@ jobs:
       run: |
         sudo apt-get update -qq
         sudo apt-get install -qq libreoffice-calc gnumeric xvfb
-        pip install nose2
-    - name: Run tests
-      run: xvfb-run nose2
+        python -m pip install --upgrade pip poetry
+        poetry install
+    - name: Test with unittest
+      run: |
+        xvfb-run python -m unittest discover
 

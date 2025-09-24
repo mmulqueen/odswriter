@@ -1,0 +1,28 @@
+[project]
+name = "odswriter"
+version = "0.5.0"
+description = "A pure-Python module for writing OpenDocument spreadsheets (similar to csv.writer)."
+authors = [
+    {name = "Michael Mulqueen", email = "michael@mulqueen.me.uk"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+]
+keywords = ["opendocument", "spreadsheet", "ods", "libreoffice"]
+dynamic = [ "classifiers" ]
+
+[project.urls]
+homepage = "https://github.com/mmulqueen/odswriter"
+repository = "https://github.com/mmulqueen/odswriter"
+
+[tool.poetry]
+classifiers = [
+  "Topic :: Office/Business :: Financial :: Spreadsheet",
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
