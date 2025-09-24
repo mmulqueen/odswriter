@@ -4,26 +4,12 @@ import tempfile
 import os
 import subprocess
 import csv
-import shutil
 
 import decimal
 import datetime
 
 import odswriter as ods
 
-class TempDir(object):
-    """
-        A simple context manager for temporary directories.
-    """
-
-    def __init__(self):
-        self.path = tempfile.mkdtemp()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        shutil.rmtree(self.path)
 
 def command_is_executable(args):
     try:
@@ -37,9 +23,9 @@ def launder_through_lo(rows):
         Saves rows into an ods, uses LibreOffice to convert to a CSV and loads
         the rows from that CSV.
     """
-    with TempDir() as d:
+    with tempfile.TemporaryDirectory() as temp_dir:
         # Make an ODS
-        temp_ods = os.path.join(d.path, "test.ods")
+        temp_ods = os.path.join(temp_dir, "test.ods")
         with open(temp_ods, "wb") as temp_ods_file:
             with ods.writer(temp_ods_file) as odsfile:
                 odsfile.writerows(rows)
@@ -47,12 +33,12 @@ def launder_through_lo(rows):
         # Convert it to a CSV
         p = subprocess.Popen(["libreoffice", "--headless", "--convert-to",
                               "csv", "test.ods"],
-                             cwd=d.path)
+                             cwd=temp_dir)
 
         p.wait()
 
         # Read the CSV
-        temp_csv = os.path.join(d.path,"test.csv")
+        temp_csv = os.path.join(temp_dir, "test.csv")
         with open(temp_csv) as temp_csv_file:
             csvfile = csv.reader(temp_csv_file)
             return list(csvfile)
