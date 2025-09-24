@@ -1,26 +1,3 @@
-
-# The MIT License (MIT)
-#
-# Copyright (c) 2015 Michael Mulqueen (http://michael.mulqueen.me.uk/)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import unittest
 
 import tempfile
@@ -63,8 +40,9 @@ def launder_through_lo(rows):
     with TempDir() as d:
         # Make an ODS
         temp_ods = os.path.join(d.path, "test.ods")
-        with ods.writer(open(temp_ods, "wb")) as odsfile:
-            odsfile.writerows(rows)
+        with open(temp_ods, "wb") as temp_ods_file:
+            with ods.writer(temp_ods_file) as odsfile:
+                odsfile.writerows(rows)
 
         # Convert it to a CSV
         p = subprocess.Popen(["libreoffice", "--headless", "--convert-to",
@@ -75,8 +53,9 @@ def launder_through_lo(rows):
 
         # Read the CSV
         temp_csv = os.path.join(d.path,"test.csv")
-        csvfile =  csv.reader(open(temp_csv))
-        return list(csvfile)
+        with open(temp_csv) as temp_csv_file:
+            csvfile = csv.reader(temp_csv_file)
+            return list(csvfile)
 
 
 @unittest.skipUnless(command_is_executable(["libreoffice", "--version"]), "LibreOffice not found")
