@@ -39,3 +39,12 @@ class TestCodeExamples(TestCase):
             my_sheet.writerows([["One"],
                                 ["Two", "Four", "Sixteen"],
                                 ["Three", "Nine", "Twenty seven"]])
+
+    def test_fods_example(self):
+        with io.StringIO() as f:
+            with ods.fods_writer(f) as fodsfile:
+                fodsfile.writerow(["Why .fods?", "Because they're so simple, no zip file required!"])
+            val = f.getvalue()
+            self.assertGreater(len(val), 0)
+            self.assertIn("Why .fods?", val)
+            self.assertIn("Because they're so simple, no zip file required!", val)

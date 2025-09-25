@@ -29,3 +29,15 @@ class TestIO(TestCase):
         f = tempfile.TemporaryFile(mode="wb")
         with ods.writer(f) as odsfile:
             odsfile.writerows(self.rows)
+
+    def test_fods_StringIO(self):
+        f = io.StringIO()
+        with ods.fods_writer(f) as odsfile:
+            odsfile.writerows(self.rows)
+        val = f.getvalue()
+        self.assertGreater(len(val), 0) # Produces non-empty output
+
+    def test_fods_FileIO(self):
+        f = tempfile.TemporaryFile(mode="w+")
+        with ods.fods_writer(f) as odsfile:
+            odsfile.writerows(self.rows)

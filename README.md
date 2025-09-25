@@ -14,6 +14,7 @@ Features
  - Tested on Python 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13
  - Probably still mostly compatible with Python 2.7 and 3.3 to 3.6, but no longer tested.
  - Support for writing formulae (but not evaluating their results)
+ - Flat ODS (.fods) files can also be generated using
 
 License
 -----------
@@ -31,7 +32,6 @@ import odswriter as ods
 with open("test.ods", "wb") as f:
     with ods.writer(f) as odsfile:
         odsfile.writerow(["String", "ABCDEF123456", "123456"])
-        # Lose the 2L below if you want to run this example code on Python 3, Python 3 has no long type.
         odsfile.writerow(["Float", 1, 123, 123.123, decimal.Decimal("10.321")])
         odsfile.writerow(["Date/DateTime", datetime.datetime.now(), datetime.date(1989, 11, 9)])
         odsfile.writerow(["Time",datetime.time(13, 37),datetime.time(16, 17, 18)])
@@ -47,6 +47,12 @@ with open("test-multi.ods", "wb") as f:
         sloths = odsfile.new_sheet("Sloths")
         sloths.writerow(["Pygmy Three-Toed Sloth", "Maned Sloth", "Pale-Throated Sloth", "Brown-Throated Sloth",
                          "Linneaeus's Two-Twoed Sloth", "Hoffman's Two-Toed Sloth"])
+
+
+# Flat ODS (.fods) file
+with open("test.fods", "w") as f:
+    with ods.fods_writer(f) as fodsfile:
+        fodsfile.writerow(["Why .fods?", "Because they're so simple, no zip file required!"])
 ```
 
 Compatibility

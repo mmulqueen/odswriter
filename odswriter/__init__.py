@@ -22,7 +22,7 @@ except NameError:
 # End compatibility setup.
 
 
-class BaseWriter(object):
+class BaseWriter:
     """
     Base class for ODS/FODS writing, contains methods for setting up and managing sheets. Should 
     not be instantiated directly.
@@ -84,8 +84,7 @@ class ODSWriter(BaseWriter):
     object like a context manager.
     """
     def __init__(self, odsfile, compression=ZIP_STORED):
-        # Initialise parent class
-        BaseWriter.__init__(self)
+        super().__init__()
         # Setup zip file
         self.zipf = ZipFile(odsfile, "w", compression)
         self.zipf.writestr("mimetype",
@@ -114,7 +113,7 @@ class FODSWriter(BaseWriter):
     """
     def __init__(self, fodsfile):
         # Initialise parent class
-        BaseWriter.__init__(self)
+        super().__init__()
         # Setup xml file
         self.xmlf = fodsfile
     
@@ -126,7 +125,6 @@ class FODSWriter(BaseWriter):
         :return: Nothing.
         """
         self.xmlf.write(self.dom.toxml())
-        self.xmlf.close()
 
 
 class Sheet(object):
@@ -221,20 +219,21 @@ class Sheet(object):
 
 def writer(odsfile, *args, **kwargs):
     """
-        Returns an ODSWriter (.osd) or FODSWriter (.fosd) object, depending on the file extension.
+        Returns an ODSWriter object.
 
-        Python 3: Make sure that the file you pass is mode "wb" for .ods files and mode "w" for 
-        .fosd files:
+        Python 3: Make sure that the file you pass is mode b:
         f = open("spreadsheet.ods", "wb")
         odswriter.writer(f)
-        f = open("spreadsheet.fods", "w")
-        odswriter.writer(f)
         ...
-        Otherwise you will get "TypeError"
+        Otherwise you will get "TypeError: must be str, not bytes"
     """
-    if odsfile.name.endswith(".fods"):
-        # FODS mode
-        return FODSWriter(odsfile, *args, **kwargs)
-    else:
-        # ODS mode
-        return ODSWriter(odsfile, *args, **kwargs)
+    return ODSWriter(odsfile, *args, **kwargs)
+
+
+def fods_writer(fodsfile, *args, **kwargs):
+    """
+        Returns an FODSWriter object.
+
+        Same usage as writer, but for flat XML files.
+    """
+    return FODSWriter(fodsfile, *args, **kwargs)
