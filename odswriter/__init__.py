@@ -28,8 +28,6 @@ class BaseWriter:
     not be instantiated directly.
     """
     def __init__(self):
-        # Make the skeleton of an ODS.
-        self.dom = parseString(ods_components.content_xml)
         # Setup sheets
         self.default_sheet = None
         self.sheets = []
@@ -93,6 +91,10 @@ class ODSWriter(BaseWriter):
                            ods_components.manifest_xml.encode("utf-8"))
         self.zipf.writestr("styles.xml",
                            ods_components.styles_xml.encode("utf-8"))
+        self.zipf.writestr("meta.xml",
+                           ods_components.meta_xml.encode("utf-8"))
+        # Make the skeleton of an ODS.
+        self.dom = parseString(ods_components.content_xml)
     
     def close(self):
         """
@@ -107,15 +109,16 @@ class ODSWriter(BaseWriter):
 
 class FODSWriter(BaseWriter):
     """
-    Utility for writing Flat OpenDocument Spreadsheets (.fods). Can be used in simple 1 sheet mode 
-    (use writerow/writerows) or with multiple sheets (use new_sheet). It is suggested that you use 
+    Utility for writing Flat OpenDocument Spreadsheets (.fods). Can be used in simple 1 sheet mode
+    (use writerow/writerows) or with multiple sheets (use new_sheet). It is suggested that you use
     with object like a context manager.
     """
     def __init__(self, fodsfile):
-        # Initialise parent class
         super().__init__()
         # Setup xml file
         self.xmlf = fodsfile
+        # Make the skeleton of an ODS.
+        self.dom = parseString(ods_components.fods_document)
     
     def close(self):
         """
