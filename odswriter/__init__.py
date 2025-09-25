@@ -22,21 +22,15 @@ except NameError:
 # End compatibility setup.
 
 
-class ODSWriter(object):
+class BaseWriter(object):
     """
-    Utility for writing OpenDocument Spreadsheets. Can be used in simple 1 sheet mode (use writerow/writerows) or with
-    multiple sheets (use new_sheet). It is suggested that you use with object like a context manager.
+    Base class for ODS/FODS writing, contains methods for setting up and managing sheets. Should 
+    not be instantiated directly.
     """
-    def __init__(self, odsfile, compression=ZIP_STORED):
-        self.zipf = ZipFile(odsfile, "w", compression)
+    def __init__(self):
         # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
-        self.zipf.writestr("mimetype",
-                           ods_components.mimetype.encode("utf-8"))
-        self.zipf.writestr("META-INF/manifest.xml",
-                           ods_components.manifest_xml.encode("utf-8"))
-        self.zipf.writestr("styles.xml",
-                           ods_components.styles_xml.encode("utf-8"))
+        # Setup sheets
         self.default_sheet = None
         self.sheets = []
 
@@ -47,13 +41,10 @@ class ODSWriter(object):
         self.close()
 
     def close(self):
-        """
-        Finalises the compressed version of the spreadsheet. If you aren't using the context manager ('with' statement,
-        you must call this manually, it is not triggered automatically like on a file object.
-        :return: Nothing.
-        """
-        self.zipf.writestr("content.xml", self.dom.toxml().encode("utf-8"))
-        self.zipf.close()
+        raise NotImplementedError(
+            "BaseWriter should not be instantiated directly. Please use either ODSWriter for .ods "
+            "(zipped) spreadsheets or FODSWriter for .fods (human-readable) spreadsheets."
+        )
 
     def writerow(self, cells):
         """
@@ -84,6 +75,58 @@ class ODSWriter(object):
         sheet = Sheet(self.dom, name, cols)
         self.sheets.append(sheet)
         return sheet
+
+
+class ODSWriter(BaseWriter):
+    """
+    Utility for writing OpenDocument Spreadsheets (.ods). Can be used in simple 1 sheet mode (use 
+    writerow/writerows) or with multiple sheets (use new_sheet). It is suggested that you use with 
+    object like a context manager.
+    """
+    def __init__(self, odsfile, compression=ZIP_STORED):
+        # Initialise parent class
+        BaseWriter.__init__(self)
+        # Setup zip file
+        self.zipf = ZipFile(odsfile, "w", compression)
+        self.zipf.writestr("mimetype",
+                           ods_components.mimetype.encode("utf-8"))
+        self.zipf.writestr("META-INF/manifest.xml",
+                           ods_components.manifest_xml.encode("utf-8"))
+        self.zipf.writestr("styles.xml",
+                           ods_components.styles_xml.encode("utf-8"))
+    
+    def close(self):
+        """
+        Finalises the compressed version of the spreadsheet. If you aren't using the context 
+        manager ('with' statement, you must call this manually, it is not triggered automatically 
+        like on a file object.
+        :return: Nothing.
+        """
+        self.zipf.writestr("content.xml", self.dom.toxml().encode("utf-8"))
+        self.zipf.close()
+
+
+class FODSWriter(BaseWriter):
+    """
+    Utility for writing Flat OpenDocument Spreadsheets (.fods). Can be used in simple 1 sheet mode 
+    (use writerow/writerows) or with multiple sheets (use new_sheet). It is suggested that you use 
+    with object like a context manager.
+    """
+    def __init__(self, fodsfile):
+        # Initialise parent class
+        BaseWriter.__init__(self)
+        # Setup xml file
+        self.xmlf = fodsfile
+    
+    def close(self):
+        """
+        Finalises the flat version of the spreadsheet. If you aren't using the context 
+        manager ('with' statement, you must call this manually, it is not triggered automatically 
+        like on a file object.
+        :return: Nothing.
+        """
+        self.xmlf.write(self.dom.toxml())
+        self.xmlf.close()
 
 
 class Sheet(object):
@@ -178,12 +221,20 @@ class Sheet(object):
 
 def writer(odsfile, *args, **kwargs):
     """
-        Returns an ODSWriter object.
+        Returns an ODSWriter (.osd) or FODSWriter (.fosd) object, depending on the file extension.
 
-        Python 3: Make sure that the file you pass is mode b:
+        Python 3: Make sure that the file you pass is mode "wb" for .ods files and mode "w" for 
+        .fosd files:
         f = open("spreadsheet.ods", "wb")
         odswriter.writer(f)
+        f = open("spreadsheet.fods", "w")
+        odswriter.writer(f)
         ...
-        Otherwise you will get "TypeError: must be str, not bytes"
+        Otherwise you will get "TypeError"
     """
-    return ODSWriter(odsfile, *args, **kwargs)
+    if odsfile.name.endswith(".fods"):
+        # FODS mode
+        return FODSWriter(odsfile, *args, **kwargs)
+    else:
+        # ODS mode
+        return ODSWriter(odsfile, *args, **kwargs)
