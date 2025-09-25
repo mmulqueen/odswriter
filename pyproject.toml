@@ -7,7 +7,7 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 dependencies = [
 ]
 keywords = ["opendocument", "spreadsheet", "ods", "libreoffice"]
