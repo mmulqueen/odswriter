@@ -4,6 +4,7 @@ import io
 import tempfile
 import decimal
 import datetime
+import zipfile
 
 import odswriter as ods
 
@@ -29,3 +30,20 @@ class TestIO(TestCase):
         f = tempfile.TemporaryFile(mode="wb")
         with ods.writer(f) as odsfile:
             odsfile.writerows(self.rows)
+
+    def test_structured_and_compressed_correctly(self):
+        # ODF spec: mimetype must be the first entry and stored uncompressed.
+        # Other entries must use the compression the caller requested.
+        for compression in (zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED):
+            f = io.BytesIO()
+            with ods.writer(f, compression=compression) as odsfile:
+                odsfile.writerows(self.rows)
+            with zipfile.ZipFile(io.BytesIO(f.getvalue())) as z:
+                self.assertEqual(z.infolist()[0].filename, "mimetype",
+                                 msg="mimetype not first (compression={})".format(compression))
+                self.assertEqual(z.getinfo("mimetype").compress_type,
+                                 zipfile.ZIP_STORED,
+                                 msg="mimetype not stored (compression={})".format(compression))
+                self.assertEqual(z.getinfo("content.xml").compress_type,
+                                 compression,
+                                 msg="content.xml not using requested compression={}".format(compression))

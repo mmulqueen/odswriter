@@ -4,6 +4,7 @@ import tempfile
 import os
 import subprocess
 import csv
+import zipfile
 
 import decimal
 import datetime
@@ -18,7 +19,7 @@ def command_is_executable(args):
     except OSError:
         return False
 
-def launder_through_lo(rows):
+def launder_through_lo(rows, **writer_kwargs):
     """
         Saves rows into an ods, uses LibreOffice to convert to a CSV and loads
         the rows from that CSV.
@@ -27,7 +28,7 @@ def launder_through_lo(rows):
         # Make an ODS
         temp_ods = os.path.join(temp_dir, "test.ods")
         with open(temp_ods, "wb") as temp_ods_file:
-            with ods.writer(temp_ods_file) as odsfile:
+            with ods.writer(temp_ods_file, **writer_kwargs) as odsfile:
                 odsfile.writerows(rows)
 
         # Convert it to a CSV
@@ -127,3 +128,13 @@ class TestViaLibreOffice(unittest.TestCase):
                                   "<br />",
                                   "&",
                                   "&amp;"]])
+
+    def test_round_trip_stored(self):
+        lrows = launder_through_lo([["String", "hello world", "123456"]],
+                                   compression=zipfile.ZIP_STORED)
+        self.assertEqual(lrows, [["String", "hello world", "123456"]])
+
+    def test_round_trip_deflated(self):
+        lrows = launder_through_lo([["String", "hello world", "123456"]],
+                                   compression=zipfile.ZIP_DEFLATED)
+        self.assertEqual(lrows, [["String", "hello world", "123456"]])

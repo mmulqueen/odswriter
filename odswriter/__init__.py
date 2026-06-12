@@ -1,11 +1,19 @@
 from __future__ import unicode_literals
-from zipfile import ZipFile, ZIP_STORED
+from zipfile import ZipFile, ZIP_STORED, ZIP_DEFLATED
 import decimal
 import datetime
 from xml.dom.minidom import parseString
 
 from . import ods_components
 from .formula import Formula
+
+# Prefer DEFLATE when zlib is available; fall back to STORED on the rare
+# Python build that lacks it (zipfile would otherwise raise at write time).
+try:
+    import zlib  # noqa: F401
+    _DEFAULT_COMPRESSION = ZIP_DEFLATED
+except ImportError:
+    _DEFAULT_COMPRESSION = ZIP_STORED
 
 # Basic compatibility setup for Python 2 and Python 3.
 
@@ -27,12 +35,19 @@ class ODSWriter(object):
     Utility for writing OpenDocument Spreadsheets. Can be used in simple 1 sheet mode (use writerow/writerows) or with
     multiple sheets (use new_sheet). It is suggested that you use with object like a context manager.
     """
-    def __init__(self, odsfile, compression=ZIP_STORED):
+    def __init__(self, odsfile, compression=_DEFAULT_COMPRESSION):
+        # BZIP2/LZMA write valid ZIPs but fail to open in LibreOffice 24.2.7
+        # and Gnumeric 1.12.56 (tested 2026-06-12).
+        if compression not in (ZIP_STORED, ZIP_DEFLATED):
+            raise ValueError("compression must be ZIP_STORED or ZIP_DEFLATED")
         self.zipf = ZipFile(odsfile, "w", compression)
         # Make the skeleton of an ODS.
         self.dom = parseString(ods_components.content_xml)
+        # ODF requires the mimetype entry to be stored uncompressed, regardless
+        # of the compression used for the rest of the package.
         self.zipf.writestr("mimetype",
-                           ods_components.mimetype.encode("utf-8"))
+                           ods_components.mimetype.encode("utf-8"),
+                           compress_type=ZIP_STORED)
         self.zipf.writestr("META-INF/manifest.xml",
                            ods_components.manifest_xml.encode("utf-8"))
         self.zipf.writestr("styles.xml",
