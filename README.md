@@ -18,6 +18,14 @@ License
 -----------
 The MIT License (MIT), refer to LICENSE.txt
 
+Installation
+------------
+Available on PyPI: https://pypi.org/project/odswriter/
+
+```bash
+pip install odswriter
+```
+
 Example
 ---------
 ```python
@@ -72,5 +80,5 @@ Testing
 LibreOffice and Gnumeric are used to verify the output of odswriter if installed.
 
 ```bash
-poetry run python3 -m unittest discover -s tests
+uv run python3 -m unittest discover -s tests
 ```

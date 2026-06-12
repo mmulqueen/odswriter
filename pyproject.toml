@@ -6,23 +6,34 @@ authors = [
     {name = "Michael Mulqueen", email = "michael@mulqueen.me.uk"}
 ]
 license = "MIT"
+license-files = ["LICENSE.txt"]
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = [
-]
+dependencies = []
 keywords = ["opendocument", "spreadsheet", "ods", "libreoffice"]
-dynamic = [ "classifiers" ]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Spreadsheet",
+]
 
 [project.urls]
-homepage = "https://github.com/mmulqueen/odswriter"
-repository = "https://github.com/mmulqueen/odswriter"
-
-[tool.poetry]
-classifiers = [
-  "Topic :: Office/Business :: Financial :: Spreadsheet",
-]
-
+Homepage = "https://github.com/mmulqueen/odswriter"
+Repository = "https://github.com/mmulqueen/odswriter"
+Issues = "https://github.com/mmulqueen/odswriter/issues"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["odswriter"]
